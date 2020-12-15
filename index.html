@@ -53,7 +53,7 @@
                 <template x-if="section == 'top100'">
                     <div class="text-xl md:text-3xl text-center">
                         Top 100 movies in <a href="https://www.reddit.com/r/opendirectories/"
-                            target="_blank">r/opendirectories/</a>
+                            target="_blank" x-text="directory ? directory : 'r/opendirectories'">/</a>
                     </div>
                 </template>
             </div>
