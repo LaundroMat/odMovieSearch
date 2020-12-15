@@ -16,7 +16,7 @@
 
 <body>
     <nav class="container mx-auto mt-4">
-        <div class="flex gap-x-4 justify-center">
+        <div class="flex gap-x-4 justify-center" x-data="nav()">
             <a href="./index.html" class="text-indigo-500 hover:text-indigo-300 font-semibold tracking-wider uppercase">
                 Search
             </a>
@@ -46,8 +46,15 @@
                     Top 100 movies in <a href="https://www.reddit.com/r/opendirectories/"
                         target="_blank">r/opendirectories/</a>
                 </div>
-                <div class="mb-8 text-sm text-gray-400">
-                    indexing since Dec 14, 2020
+                <div class="flex gap-x-2 mb-8 text-sm text-gray-400" x-data="overview()" x-init="get_stats()">
+                    <div x-text="`${total} movies indexed`">
+                    </div>
+                    <div>
+                        &bull;
+                    </div>
+                    <div>
+                        indexing since Dec 14, 2020
+                    </div>
                 </div>
                 <div class="flex gap-x-8">
                     <div>
@@ -208,13 +215,27 @@
 <script>
     var typesense_client = new Typesense.Client({
         'nodes': [{
-            'host': 'lfvrjt370mk8x2e9p-1.a1.typesense.net',
+            'host': 'zcwkae9v3yg17x6sp-1.a1.typesense.net',
             'port': '443',
             'protocol': 'https',
         }],
-        'apiKey': 'ZZI2Rck5aGsqOb9EoaxlzaSPIiShMFd9',
+        'apiKey': 'FpiCXS5EIXR09VmjJ8KfPunCYGgDhDxl',
         'connectionTimeoutSeconds': 2
     })
+
+    function overview() {
+        return {
+            total: 0,
+            get_stats() {
+                var searchParameters = {
+                    'q': '*',
+                    'query_by': 'title'
+                }
+                typesense_client.collections('movies').documents().search(searchParameters).then(data => this.total =
+                    data.found)
+            }
+        }
+    }
 
     function top100() {
         return {
@@ -233,13 +254,13 @@
                     'facet_by': 'directory_url,genres'
                 }
                 if (this.genre) {
-                    searchParameters.filter_by = `genres:${this.genre}`;
+                    searchParameters.filter_by = `genres:=${this.genre}`;
                 }
                 if (this.directory) {
-                    searchParameters.filter_by = `directory_url:${this.directory}`
+                    searchParameters.filter_by = `directory_url:=${this.directory}`
                 }
                 if (this.genre && this.directory) {
-                    searchParameters.filter_by = `genres:${this.genre}&&directory_url:${this.directory}`;
+                    searchParameters.filter_by = `genres:=${this.genre} && directory_url:=${this.directory}`;
                 }
                 typesense_client.collections('movies').documents().search(searchParameters).then(data =>
                     this.result = data)
