@@ -15,10 +15,11 @@
 </head>
 
 <body>
-    <section x-data="main()" x-init="readURLParams(); $watch('section', value => switchSection()); $watch('directory', value => setFilter());
-        $watch('genre', value => setFilter()); $watch('year', value => setFilter()); $watch('query', value =>
-        lookup(query)); get_stats(); switchSection()">
-        <nav class="container mx-auto mt-4">
+    <section x-data="main()" x-init="readURLParams(); $watch('directory', value => setFilter());
+        $watch('genre', value => setFilter()); $watch('year', value =>
+        setFilter()); $watch('query', value =>
+        lookup(query)); get_stats()">
+        <!-- <nav class="container mx-auto mt-4">
             <div class="flex gap-x-4 justify-center">
                 <a href="./index.html"
                     class="text-indigo-500 hover:text-indigo-300 font-semibold tracking-wider uppercase"
@@ -33,7 +34,7 @@
                     Top 100
                 </a>
             </div>
-        </nav>
+        </nav> -->
         <div class="mt-8 text-center">
             <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
                 data-name="bmc-button" data-slug="St8NicmPr" data-color="#FFDD00" data-emoji="" data-font="Cookie"
@@ -45,18 +46,10 @@
         </div>
         <div class="container mx-auto">
             <div class="flex justify-center mt-8">
-                <template x-if="section == 'search'">
-                    <div class="text-xl md:text-3xl text-center">
-                        Search for movies in <a href=" https://www.reddit.com/r/opendirectories/" target="_blank">
-                            r/opendirectories/</a>
-                    </div>
-                </template>
-                <template x-if="section == 'top100'">
-                    <div class="text-xl md:text-3xl text-center">
-                        Top 100 movies in <a href="https://www.reddit.com/r/opendirectories/" target="_blank"
-                            x-text="directory ? directory : 'r/opendirectories'">/</a>
-                    </div>
-                </template>
+                <div class="text-xl md:text-3xl text-center">
+                    Search for movies in <a href=" https://www.reddit.com/r/opendirectories/" target="_blank">
+                        r/opendirectories/</a>
+                </div>
             </div>
             <div class="text-center gap-x-2 mb-8 text-sm text-gray-400"
                 x-text="`${total} movies indexed since Dec 14 2020`">
@@ -70,11 +63,10 @@
                 </div>
             </template>
             <template x-if="total">
-
                 <div class="flex flex-col md:flex-row justify-center items-center gap-x-8">
                     <div>
                         <select name="selectGenre" x-model="genre">
-                            <option value="">Filter by genre</option>
+                            <option value="">All genres</option>
                             <template x-if="facets.genres.length" x-for="genre_facet in facets.genres">
                                 <option x-text="genre_facet"></option>
                             </template>
@@ -82,7 +74,7 @@
                     </div>
                     <div>
                         <select name="selectYear" x-model="year">
-                            <option value="">Filter by year</option>
+                            <option value="">All years</option>
                             <template x-if="facets.year.length" x-for="year_facet in facets.year">
                                 <option x-text="year_facet"></option>
                             </template>
@@ -90,7 +82,7 @@
                     </div>
                     <div>
                         <select name="selectServer" x-model="directory">
-                            <option value="">Filter by directory</option>
+                            <option value="">All directories</option>
                             <template x-if="facets.directory.length" x-for="directory_facet in facets.directory">
                                 <option x-text="directory_facet"></option>
                             </template>
@@ -225,6 +217,9 @@
             </div>
         </div>
     </section>
+    <div class="mt-16">
+
+    </div>
 </body>
 
 <script>
@@ -241,7 +236,7 @@
 
     function main() {
         return {
-            section: 'search',
+            // filters:
             directory: '',
             genre: '',
             year: '',
@@ -265,8 +260,7 @@
                 var searchParameters = {
                     'q': '*',
                     'facet_by': 'year,genres,directory_url',
-                    'max_hits': 'all',
-                    'per_page': 250
+                    'max_facet_values': 250,
                 }
                 typesense_client.collections('movies').documents().search(searchParameters)
                     .then(data => {
@@ -278,17 +272,19 @@
                             genres: data.facet_counts.find(k =>
                                 k.field_name == 'genres').counts.map(el => el.value).sort(),
                             year: data.facet_counts.find(k =>
-                                k.field_name == 'year').counts.map(el => el.value).sort()
+                                k.field_name == 'year').counts.map(el => el.value).sort().reverse()
                         }
-                        console.log(JSON.parse(JSON.stringify(this.facets)))
+                    }).then(() => {
+                        this.lookup()
                     })
             },
             lookup() {
                 this.isLoading = true;
                 this.open = true;
                 var searchParameters = {
-                    'q': this.query,
-                    'query_by': 'title'
+                    'q': this.query || '*',
+                    'query_by': 'title',
+                    'sort_by': 'imdb_rating:desc'
                 }
 
                 searchParameters.filter_by = this.getTypesenseFilters()
@@ -308,34 +304,8 @@
                 if (this.year) {
                     filters.push(`year:=${this.year}`)
                 }
+
                 return filters.join(' && ')
-            },
-            getTop100() {
-                this.isLoading = true;
-                var searchParameters = {
-                    'q': '*',
-                    'query_by': 'title',
-                    'per_page': 100,
-                    'max_hits': 100,
-                    'facet_by': 'directory_url,genres,year'
-                }
-                searchParameters.filter_by = this.getTypesenseFilters()
-                // if (this.genre) {
-                //     searchParameters.filter_by = `genres:=${this.genre}`;
-                // }
-                // if (this.directory) {
-                //     searchParameters.filter_by = `directory_url:=${this.directory}`
-                // }
-                // if (this.year) {
-                //     searchParameters.filter_by = `year=${this.year}`
-                // }
-                // if (this.genre && this.directory) {
-                //     searchParameters.filter_by = `genres:=${this.genre} && directory_url:=${this.directory}`;
-                // }
-                typesense_client.collections('movies').documents().search(searchParameters).then(data =>
-                    this.result = data)
-                this.setURLParams()
-                this.isLoading = false
             },
             readURLParams() {
                 const url = new URL(window.location)
@@ -343,29 +313,14 @@
                 this.directory = url.searchParams.get("directory") || ''
                 this.genre = url.searchParams.get("genre") || ''
             },
-            switchSection() {
-                if (this.section == 'top100') {
-                    this.getTop100()
-                }
-                if (this.section == 'search') {
-                    this.directory = ''
-                    this.genre = ''
-                    this.year = ''
-                }
-                this.result = {
-                    hits: []
-                }
-                this.setURLParams()
-            },
             setFilter() {
-                this.getTop100()
+                this.lookup()
                 this.setURLParams()
             },
             resetFilters() {
                 this.genre = ''
                 this.directory = ''
                 this.year = ''
-                this.getTop100()
                 this.setURLParams()
             },
             setURLParams() {
