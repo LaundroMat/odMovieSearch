@@ -41,7 +41,7 @@
                 data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000"
                 data-coffee-color="#ffffff"></script>
             <div class="text-center text-sm text-gray-700 mb-2">
-                or say hi to <a href="https://www.reddit.com/user/Laundr" target="_blank">u/laundr</a>
+                the server needs about two beers a month to continue to run
             </div>
         </div>
         <div class="container mx-auto">
@@ -62,8 +62,17 @@
                     </input>
                 </div>
             </template>
+            <template x-if="result.page > 1">
+                <div class="my-4 flex justify-center gap-x-6">
+                    <button class="px-2 py-1 border border-gray-300 rounded" @click="loadpreviousPage()">Previous
+                        250
+                        results</button>
+                    <button class="px-2 py-1  border border-gray-300 rounded" @click="loadNextPage()">Next 250
+                        results</button>
+                </div>
+            </template>
             <template x-if="total">
-                <div class="flex flex-col md:flex-row justify-center items-center gap-x-8">
+                <div class="flex flex-col md:flex-row justify-center items-center gap-x-8 mt-8">
                     <div>
                         <select name="selectGenre" x-model="genre">
                             <option value="">All genres</option>
@@ -216,10 +225,17 @@
                 </template>
             </div>
         </div>
+        <template x-if="result.page > 0 && result.hits.length > 0">
+            <div class="my-16 flex justify-center gap-x-6">
+                <template x-if="result.page > 1">
+                    <button class="px-2 py-1 border border-gray-300 rounded" @click="loadpreviousPage()">Previous 250
+                        results</button>
+                </template>
+                <button class="px-2 py-1  border border-gray-300 rounded" @click="loadNextPage()">Next 250
+                    results</button>
+            </div>
+        </template>
     </section>
-    <div class="mt-16">
-
-    </div>
 </body>
 
 <script>
@@ -244,7 +260,8 @@
             query: '',
 
             result: {
-                hits: []
+                hits: [],
+                page: 1
             },
 
             facets: {
@@ -253,6 +270,7 @@
                 genres: []
             },
 
+            pageToFetch: 1,
             total: 0,
             isLoading: false,
             open: false,
@@ -284,7 +302,10 @@
                 var searchParameters = {
                     'q': this.query || '*',
                     'query_by': 'title',
-                    'sort_by': 'imdb_rating:desc'
+                    'sort_by': 'imdb_rating:desc',
+                    'max_hits': 'all',
+                    'per_page': 250,
+                    'page': this.pageToFetch
                 }
 
                 searchParameters.filter_by = this.getTypesenseFilters()
@@ -292,6 +313,16 @@
                 typesense_client.collections('movies').documents().search(searchParameters).then(data =>
                     this.result = data)
                 this.isLoading = false
+            },
+            loadNextPage() {
+                this.pageToFetch += 1
+                window.scrollTo(0, 0)
+                this.lookup()
+            },
+            loadpreviousPage() {
+                this.pageToFetch = this.pageToFetch > 0 ? this.pageToFetch - 1 : this.pageToFetch
+                window.scrollTo(0, 0)
+                this.lookup()
             },
             getTypesenseFilters() {
                 let filters = []
