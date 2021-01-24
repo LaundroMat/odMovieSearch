@@ -284,6 +284,7 @@
                     'q': '*',
                     'facet_by': 'year,genres,directory_url',
                     'max_facet_values': 250,
+                    'num_typos': 0,
                 }
                 typesense_client.collections('movies').documents().search(searchParameters)
                     .then(data => {
@@ -307,10 +308,14 @@
                 var searchParameters = {
                     'q': this.query || '*',
                     'query_by': 'title',
-                    'sort_by': 'imdb_rating:desc',
                     'max_hits': 'all',
                     'per_page': 250,
-                    'page': this.pageToFetch
+                    'page': this.pageToFetch,
+                    'num_typos': 0,
+                }
+
+                if (!this.query) {
+                    searchParameters['sort_by'] = 'imdb_rating:desc'
                 }
 
                 searchParameters.filter_by = this.getTypesenseFilters()
