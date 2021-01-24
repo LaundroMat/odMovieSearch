@@ -108,23 +108,26 @@
                 </div>
             </template>
             <template x-if="!isLoading">
-                <div x-show.transition="result.hits" class="mt-4 w-2/3 mx-auto rounded-b-lg shadow-lg z-10 bg-white">
+                <div class="text-xs my-1 w-2/3 md:mx-auto shadow-none text-gray-400"
+                    x-text="result.found ? result.found + ' results': '' ">
+                </div>
+                <div x-show.transition="result.hits" class="mt-4 md:w-2/3 mx-auto rounded-b-lg shadow-lg z-10 ">
                     <template x-for="(hit, index) in result.hits" :key="index">
                         <!-- You can also reference "index" inside the iteration if you need. -->
-                        <div class="flex flex-col px-6 py-2 justify-between hover:bg-indigo-100"
+                        <div class="flex flex-col px-6 py-2 justify-between hover:bg-indigo-100 bg-white"
                             :class="{'bg-gray-100': index % 2 == 0}">
                             <div class="md:flex justify-between">
                                 <div class="flex gap-x-2 items-baseline">
-                                    <a :href="hit.document.file_url"
-                                        class="text-indigo-700 hover:text-indigo-600 font-semibold text-xl capitalize tracking-wide">
+                                    <a :href="hit.document.file_url" target="_blank"
+                                        class="text-indigo-700 hover:text-indigo-600 hover:underline font-semibold text-xl capitalize tracking-wide">
                                         <span x-text="hit.document.title">
                                         </span> (<span x-text="hit.document.year"></span>)
-                                        <template x-if="hit.document.screen_size">
-                                            <div x-text="hit.document.screen_size"
-                                                class="inline-block border border-1 rounded-md text-sm text-gray-400 bg-gray-100 px-2">
-                                            </div>
-                                        </template>
                                     </a>
+                                    <template x-if="hit.document.screen_size">
+                                        <div x-text="hit.document.screen_size"
+                                            class="inline-block border border-1 rounded-md text-sm text-gray-400 bg-gray-100 px-2">
+                                        </div>
+                                    </template>
                                 </div>
                                 <a class="flex gap-x-2 items-baseline" :href="hit.document.imdb_url" target="_blank">
                                     <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
