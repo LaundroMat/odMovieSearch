@@ -35,15 +35,6 @@
                 </a>
             </div>
         </nav> -->
-        <div class="mt-8 text-center">
-            <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-                data-name="bmc-button" data-slug="St8NicmPr" data-color="#FFDD00" data-emoji="" data-font="Cookie"
-                data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000"
-                data-coffee-color="#ffffff"></script>
-            <div class="text-center text-sm text-gray-700 mb-2">
-                the server needs about two beers a month to continue to run
-            </div>
-        </div>
         <div class="container mx-auto">
             <div class="flex justify-center mt-8">
                 <div class="text-xl md:text-3xl text-center">
@@ -54,6 +45,9 @@
             <div class="text-center gap-x-2 mb-8 text-sm text-gray-400"
                 x-text="`${total} movies indexed since Dec 14 2020`">
             </div>
+                <div class="text-xl md:text-3xl text-center">
+                    Indexer is down! If you want to roll your own, you can find the source code at <a href="https://github.com/LaundroMat/ODmovieindexer">https://github.com/LaundroMat/ODmovieindexer</a>
+                </div>
             <template x-if="section=='search'">
                 <div class="w-2/3 mx-auto" x-on:click.away="open = false">
                     <input type="text" x-on:focus="open=true" name="movieSearch"
